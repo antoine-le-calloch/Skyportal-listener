@@ -41,11 +41,11 @@ def flux_zscore(spectra, wavelength_range=(3850, 8500), interp_length=4650):
     fluxes = spectra[0]['fluxes']
 
     combined = np.stack((wavelengths, fluxes), axis=1)
-    # mask = ~np.isfinite(combined).any(axis=1)
-    # cleaned_data = combined[mask]
+    mask = np.isfinite(combined).any(axis=1)
+    cleaned_data = combined[mask]
 
-    wavelengths_cleaned = combined[:,0]
-    fluxes_cleaned = combined[:,1]
+    wavelengths_cleaned = cleaned_data[:,0]
+    fluxes_cleaned = cleaned_data[:,1]
 
     xs = np.linspace(wavelength_range[0], wavelength_range[1], interp_length)
     ys = interp1d(wavelengths_cleaned, fluxes_cleaned, kind='linear', bounds_error=False, 
