@@ -5,15 +5,24 @@ from scipy.interpolate import interp1d
 from scipy.special import softmax
 
 def flux_zscore(spectra, wavelength_range=(3850, 8500), interp_length=4650):
-    wavelengths = spectra['wavelengths']
-    fluxes = spectra['fluxes']
+    try:
+        wavelengths = np.array(spectra['wavelengths'], dtype=np.float64)
+        fluxes = np.array(spectra['fluxes'], dtype=np.float64)
+    except Exception as e:
+        raise ValueError(f"Invalid input data in spectra: {e}")
 
-    combined = np.stack((wavelengths, fluxes), axis=1)
-    mask = np.isfinite(combined).any(axis=1)
-    cleaned_data = combined[mask]
+    if len(wavelengths) != len(fluxes):
+        raise ValueError("Mismatched lengths between wavelengths and fluxes")
 
-    wavelengths_cleaned = cleaned_data[:, 0]
-    fluxes_cleaned = cleaned_data[:, 1]
+    mask = np.isfinite(wavelengths) & np.isfinite(fluxes)
+    if not np.any(mask):
+        raise ValueError("No finite values in spectrum")
+
+    wavelengths_cleaned = wavelengths[mask]
+    fluxes_cleaned = fluxes[mask]
+
+    if len(wavelengths_cleaned) < 2:
+        raise ValueError("Too few data points after cleaning")
 
     xs = np.linspace(wavelength_range[0], wavelength_range[1], interp_length)
     ys = interp1d(wavelengths_cleaned, fluxes_cleaned, kind='linear', bounds_error=False,
