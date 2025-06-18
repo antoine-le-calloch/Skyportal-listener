@@ -22,7 +22,7 @@ SkyPortal Listener is a Python script designed to monitor new astronomical sourc
 ## Usage
 Run the script with the following command:
 ```bash
-  python skyportal_listener.py --token YOUR_API_TOKEN --start-time '2025-05-15T00:00:00Z'
+python skyportal_listener.py --token YOUR_API_TOKEN --start-time '2025-05-15T00:00:00Z'
 ```
 
 ### Arguments
