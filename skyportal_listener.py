@@ -6,6 +6,7 @@ from spectra_listener import monitor_spectra
 INSTANCE_URL = "https://fritz.science"
 API_TOKEN = ""  # Replace with your actual API token
 POLL_INTERVAL = 120  # Polling interval in seconds
+LOOKBACK_DAYS = 1
 
 seen_sources = set() # Track seen source ids to avoid duplication
 header = {}
@@ -15,7 +16,7 @@ def parse_args():
         description=(
             "SkyPortal source listener\nExecutes an ML model on new spectra and prints the results.\n\n"
             "Example:\n"
-            "  python skyportal_listener.py --token YOUR_API_TOKEN --start-time '2025-05-15T00:00:00Z'\n\n"
+            "  python skyportal_listener.py --token YOUR_API_TOKEN --lookback 2\n\n"
         ),
         formatter_class=argparse.RawTextHelpFormatter
     )
@@ -25,18 +26,18 @@ def parse_args():
     parser.add_argument("--token", type=str, help="API token")
     parser.add_argument("--interval", type=int, default=POLL_INTERVAL,
                         help="Polling interval in seconds (default: %(default)s)")
-    parser.add_argument("--start-time", type=str,
-                        help="Start UTC time for fetching new sources in ISO format, e.g. '2025-05-15T00:00:00Z' (default: 1 day ago)"
-                        )
+    parser.add_argument("--lookback", type=int, default=LOOKBACK_DAYS,
+                        help="Number of days to look back for new spectra (default: %(default)s)")
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     # Override default values with command line arguments
     args = parse_args()
-    INSTANCE_URL = args.instance
     API_TOKEN = args.token or API_TOKEN
+    INSTANCE_URL = args.instance
     POLL_INTERVAL = args.interval
+    LOOPBACK_DAYS = args.lookback
 
     if not API_TOKEN:
         print("API token is required. Please provide it using --token.")
@@ -56,8 +57,9 @@ if __name__ == "__main__":
         client,
         instrument_ids=[7, 9, 35, 2, 26, 3, 1117, 1108],
         # Ids correspond to: LRIS, KAST, SPRAT, SEDM, ALFOSC, DBSP, NGPS, GHTS TODO- add KCWI (1102) and Binospec (1076)
-        lookback=2,
+        lookback=LOOPBACK_DAYS,
         interval=POLL_INTERVAL,
+        publish_to_skyportal=False,
         verbose=True,
         use_cache=True,
         clear_cache=False,
