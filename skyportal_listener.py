@@ -14,7 +14,7 @@ header = {}
 def parse_args():
     parser = argparse.ArgumentParser(
         description=(
-            "SkyPortal source listener\nExecutes an ML model on new spectra and prints the results.\n\n"
+            "SkyPortal source listener\nExecutes an ML model on new spectra and publishes the results to SkyPortal.\n"
             "Example:\n"
             "  python skyportal_listener.py --token YOUR_API_TOKEN --lookback 2\n\n"
         ),
@@ -28,6 +28,8 @@ def parse_args():
                         help="Polling interval in seconds (default: %(default)s)")
     parser.add_argument("--lookback", type=int, default=LOOKBACK_DAYS,
                         help="Number of days to look back for new spectra (default: %(default)s)")
+    parser.add_argument("--output", type=str, default="publish",
+                        help="Output mode: 'publish' to SkyPortal, 'print' to console (default: %(default)s)")
     return parser.parse_args()
 
 
@@ -38,6 +40,7 @@ if __name__ == "__main__":
     INSTANCE_URL = args.instance
     POLL_INTERVAL = args.interval
     LOOPBACK_DAYS = args.lookback
+    output = args.output
 
     if not API_TOKEN:
         print("API token is required. Please provide it using --token.")
@@ -59,7 +62,7 @@ if __name__ == "__main__":
         # Ids correspond to: LRIS, KAST, SPRAT, SEDM, ALFOSC, DBSP, NGPS, GHTS TODO- add KCWI (1102) and Binospec (1076)
         lookback=LOOPBACK_DAYS,
         interval=POLL_INTERVAL,
-        publish_to_skyportal=True,
+        publish_to_skyportal=output == "publish",
         verbose=True,
         use_cache=True,
         clear_cache=False,

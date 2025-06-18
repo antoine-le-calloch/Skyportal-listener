@@ -36,5 +36,4 @@ def process_spectra(spectra):
                'SN IIn', 'SN Ia', 'SN Ib', 'SN Ic', 'Tidal Disruption Event']
 
     output_dict = dict(zip(classes, onnx_probs_scipy.tolist()))
-    print(output_dict)
     return output_dict

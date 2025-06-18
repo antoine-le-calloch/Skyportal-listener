@@ -226,6 +226,8 @@ def monitor_spectra(
 
                 if ml_result and publish_to_skyportal:
                     post_comment(client, s['obj_id'], ml_result, attach_path=f"ml_results/{s['obj_id']}_{s['id']}_ML_probs.png")
+                else:
+                    print(ml_result)
 
                 if use_cache:
                     _cache_spectra(s['id'], cache_dir, "process_spectra")
