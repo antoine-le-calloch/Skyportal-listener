@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 from api import SkyPortal
 from execute_model import process_spectra
+from publish_result import post_comment
 
 default_cache_name = 'spectra_listener_cache.txt'
 
@@ -147,6 +148,7 @@ def monitor_spectra(
         instrument_ids: list[int],
         lookback: int,
         interval: int,
+        publish_to_skyportal: bool,
         verbose: bool,
         use_cache: bool,
         cache_dir: str,
@@ -168,6 +170,8 @@ def monitor_spectra(
         Number of days to look back for new spectra
     interval : int
         Number of seconds to wait between queries
+    publish_to_skyportal : bool
+        If True, publish the results to SkyPortal as a comment
     verbose : bool
         If True, print information at each step
     use_cache : bool
@@ -218,7 +222,10 @@ def monitor_spectra(
                 status, data = client.get_spectra(id=s['id'])
                 if status != 200:
                     raise ValueError(f'Error fetching spectra {s["id"]}: {data}')
-                process_spectra(data['data'])
+                ml_result = process_spectra(data['data'])
+
+                if ml_result and publish_to_skyportal:
+                    post_comment(client, s['obj_id'], ml_result, attach_path=f"ml_results/{s['obj_id']}_{s['id']}_ML_probs.png")
 
                 if use_cache:
                     _cache_spectra(s['id'], cache_dir, "process_spectra")

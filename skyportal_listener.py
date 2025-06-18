@@ -59,7 +59,7 @@ if __name__ == "__main__":
         # Ids correspond to: LRIS, KAST, SPRAT, SEDM, ALFOSC, DBSP, NGPS, GHTS TODO- add KCWI (1102) and Binospec (1076)
         lookback=LOOPBACK_DAYS,
         interval=POLL_INTERVAL,
-        publish_to_skyportal=False,
+        publish_to_skyportal=True,
         verbose=True,
         use_cache=True,
         clear_cache=False,

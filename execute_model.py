@@ -37,3 +37,4 @@ def process_spectra(spectra):
 
     output_dict = dict(zip(classes, onnx_probs_scipy.tolist()))
     print(output_dict)
+    return output_dict
