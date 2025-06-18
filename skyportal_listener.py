@@ -29,7 +29,7 @@ def parse_args():
     parser.add_argument("--lookback", type=int, default=LOOKBACK_DAYS,
                         help="Number of days to look back for new spectra (default: %(default)s)")
     parser.add_argument("--output", type=str, default="publish",
-                        help="Output mode: 'publish' to SkyPortal, 'print' to console (default: %(default)s)")
+                        help="Output mode: 'publish' to SkyPortal, 'store' to log to a file (default: %(default)s)")
     return parser.parse_args()
 
 

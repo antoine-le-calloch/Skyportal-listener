@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 from api import SkyPortal
 from execute_model import process_spectra
-from publish_result import post_comment
+from process_result import post_result, store_result
 
 default_cache_name = 'spectra_listener_cache.txt'
 
@@ -199,7 +199,7 @@ def monitor_spectra(
 
     while True:
         modified_before = datetime.now(timezone.utc)
-        modified_after = modified_before - timedelta(days=1)
+        modified_after = modified_before - timedelta(days=lookback)
         status, data = client.get_spectra(
             instrument_ids=instrument_ids,
             modified_after=modified_after.isoformat().split('+')[0],
@@ -218,16 +218,19 @@ def monitor_spectra(
         start = time.time()
         for s in all_spectra:
             try:
-                print(f'New spectra: {s["id"]}')
+                if verbose:
+                    print(f'New spectra: {s["id"]}')
                 status, data = client.get_spectra(id=s['id'])
                 if status != 200:
                     raise ValueError(f'Error fetching spectra {s["id"]}: {data}')
                 ml_result = process_spectra(data['data'])
 
                 if ml_result and publish_to_skyportal:
-                    post_comment(client, s['obj_id'], ml_result, attach_path=f"ml_results/{s['obj_id']}_{s['id']}_ML_probs.png")
+                    post_result(client, s['obj_id'], ml_result, attach_path=f"ml_results/{s['obj_id']}_{s['id']}_ML_probs.png")
+                    if verbose:
+                        print(f'Comment posted to SkyPortal')
                 else:
-                    print(ml_result)
+                    store_result(s['obj_id'], s['id'], ml_result, log_path='ml_results.log')
 
                 if use_cache:
                     _cache_spectra(s['id'], cache_dir, "process_spectra")
