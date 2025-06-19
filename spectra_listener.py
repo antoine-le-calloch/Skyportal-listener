@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 from api import SkyPortal
 from execute_model import process_spectra
-from process_result import post_result, store_result
+from process_result import process_result
 
 default_cache_name = 'spectra_listener_cache.txt'
 
@@ -224,17 +224,13 @@ def monitor_spectra(
                 if status != 200:
                     raise ValueError(f'Error fetching spectra {s["id"]}: {data}')
                 ml_result = process_spectra(data['data'])
-
-                if ml_result and publish_to_skyportal:
-                    post_result(client, s['obj_id'], ml_result, attach_path=f"ml_results/{s['obj_id']}_{s['id']}_ML_probs.png")
-                    if verbose:
-                        print(f'Comment posted to SkyPortal')
-                else:
-                    store_result(s['obj_id'], s['id'], ml_result, log_path='ml_results.log')
+                process_result(client, s['obj_id'], s['id'], ml_result, publish_to_skyportal)
 
                 if use_cache:
                     _cache_spectra(s['id'], cache_dir, "process_spectra")
                 already_processed.add(s['id'])
+
+                time.sleep(0.5)  # avoid hitting the API too fast
             except Exception as e:
                 traceback.print_exc()
                 print(f'Error processing spectra {s["id"]}: {e}')

@@ -25,8 +25,20 @@ def plot_probs(probs_dict, save_path):
     plt.close()
 
 
-def store_result(obj_id, spectra_id, ml_result, log_path):
+def store_result(client, obj_id, spectra_id, ml_result, log_path):
     plot_probs(ml_result, save_path=f"ml_results/{obj_id}_{spectra_id}_ML_probs.png")
+
+    status, data = client.api('GET', f"/api/sources/{obj_id}")
+    if status != 200:
+        raise ValueError(f"Error fetching source: {data}")
+    if not data.get('data'):
+        raise ValueError(f"Source {obj_id} not found")
+
+    skyportal_classifications = ""
+    for c in data['data'].get('classifications', []):
+        skyportal_classifications += f"{c['classification']} (prob={c['probability']:.3%}) - "
+
+    tns_name = data['data'].get('tns_name', 'N/A')
 
     best_result = max(ml_result, key=ml_result.get)
     best_score = ml_result[best_result]
@@ -34,8 +46,9 @@ def store_result(obj_id, spectra_id, ml_result, log_path):
         log_file.write(f"Object ID: {obj_id}\n")
         if spectra_id:
             log_file.write(f"Spectra ID: {spectra_id}\n")
-        log_file.write(f"Best classification: {best_result}\n")
-        log_file.write(f"Score: {best_score:.4f}\n")
+        log_file.write(f"TNS name: {tns_name}\n")
+        log_file.write(f"SkyPortal classifications: {skyportal_classifications}\n")
+        log_file.write(f"Apple-cider classification: {best_result} (prob={best_score:.3%})\n")
         log_file.write("-" * 40 + "\n")
 
 
@@ -57,3 +70,10 @@ def post_result(client, obj_id, ml_result, attach_path=None):
 
     if status != 200:
         raise ValueError(f"Error posting comment: {data}")
+
+
+def process_result(client, obj_id, spectra_id, ml_result, publish_to_skyportal):
+    if ml_result and publish_to_skyportal:
+        post_result(client, obj_id, ml_result, attach_path=f"ml_results/{obj_id}_{spectra_id}_ML_probs.png")
+    else:
+        store_result(client, obj_id, spectra_id, ml_result, log_path='ml_results.log')
