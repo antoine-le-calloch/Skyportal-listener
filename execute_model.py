@@ -41,8 +41,8 @@ def process_spectra(spectra):
     ort_outputs = ort_session.run(None, ort_inputs)
     onnx_probs = ort_outputs[0]
     onnx_probs_scipy = softmax(onnx_probs[0])
-    classes = ['AGN', 'Cataclysmic', 'SN II', 'SN IIP', 'SN IIb',
-               'SN IIn', 'SN Ia', 'SN Ib', 'SN Ic', 'Tidal Disruption Event']
+    classes = ['AGN', 'Cataclysmic', 'II', 'IIP', 'IIb',
+               'IIn', 'Ia', 'Ib', 'Ic', 'Tidal Disruption Event']
 
     output_dict = dict(zip(classes, onnx_probs_scipy.tolist()))
     return output_dict
