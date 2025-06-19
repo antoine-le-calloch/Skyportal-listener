@@ -28,7 +28,7 @@ def parse_args():
                         help="Polling interval in seconds (default: %(default)s)")
     parser.add_argument("--lookback", type=int, default=LOOKBACK_DAYS,
                         help="Number of days to look back for new spectra (default: %(default)s)")
-    parser.add_argument("--output", type=str, default="publish",
+    parser.add_argument("--output", type=str, default="store", choices=["publish", "store"],
                         help="Output mode: 'publish' to SkyPortal, 'store' to log to a file (default: %(default)s)")
     return parser.parse_args()
 
@@ -41,6 +41,7 @@ if __name__ == "__main__":
     POLL_INTERVAL = args.interval
     LOOPBACK_DAYS = args.lookback
     output = args.output
+
 
     if not API_TOKEN:
         print("API token is required. Please provide it using --token.")
