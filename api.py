@@ -185,3 +185,25 @@ class SkyPortal:
             raise ValueError('No query parameters provided, specify at least one')
         response = self.api('GET', endpoint, data)
         return response
+
+
+    def get_photometry(self, obj_id: str = None):
+        """
+        Get photometry from SkyPortal
+
+        Parameters
+        ----------
+        obj_id : str
+            Object ID to retrieve photometry for
+
+        Returns
+        -------
+        int
+            HTTP status code
+        dict
+            JSON response
+
+        """
+        endpoint = f"api/sources/{obj_id}/photometry"
+        response = self.api('GET', endpoint)
+        return response
