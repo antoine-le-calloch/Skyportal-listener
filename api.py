@@ -130,7 +130,7 @@ class SkyPortal:
             minimal: bool = False
         ):
         """
-        Get spectra from SkyPortal (see https://skyportal.io/docs/api.html#tag/spectra/paths/~1api~1spectra/get)
+        Get spectra from SkyPortal (see https://docs.skyportal.io/api.html#tag/spectra/paths/~1api~1spectra/get)
 
         Parameters
         ----------
